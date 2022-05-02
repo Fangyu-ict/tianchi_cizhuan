@@ -4,11 +4,11 @@ import os
 from torch.nn import init
 import numpy as np
 
-model_name = "../data/pretrain/champion2.pth"
+model_name = "../data/pretrained/cascade_rcnn_r50_fpn_20e_coco_bbox_mAP-0.41_20200504_175131-e9872a90.pth"
 
 model_coco = torch.load(model_name)
 
-num_classes=81
+num_classes=7
 
 # weight
 # model_coco["state_dict"]["backbone.conv1.weight"] = torch.cat([model_coco["state_dict"]["backbone.conv1.weight"]]*2, dim=1)
@@ -16,17 +16,15 @@ num_classes=81
 
 
 # head fc weight
-in_features = torch.cat([model_coco["state_dict"]["roi_head.bbox_head.0.fc_cls.weight"]]*12, dim=0) #model_coco["state_dict"]["roi_head.bbox_head.0.fc_cls.weight"]
+in_features = model_coco["state_dict"]["roi_head.bbox_head.0.fc_cls.weight"]
 print(in_features.shape)
 model_coco["state_dict"]["roi_head.bbox_head.0.fc_cls.weight"] = in_features[:num_classes,:]
-print(model_coco["state_dict"]["roi_head.bbox_head.0.fc_cls.weight"].shape)
 print(in_features[:num_classes,:].shape)
 model_coco["state_dict"]["roi_head.bbox_head.1.fc_cls.weight"] = in_features[:num_classes,:]
 model_coco["state_dict"]["roi_head.bbox_head.2.fc_cls.weight"] = in_features[:num_classes,:]
-#
-# # head fc bias
-# in_features = model_coco["state_dict"]["roi_head.bbox_head.0.fc_cls.bias"]
-in_features = torch.cat([model_coco["state_dict"]["roi_head.bbox_head.0.fc_cls.bias"]]*12, dim=0)
+
+# head fc bias
+in_features = model_coco["state_dict"]["roi_head.bbox_head.0.fc_cls.bias"]
 print(in_features.shape)
 model_coco["state_dict"]["roi_head.bbox_head.0.fc_cls.bias"] = in_features[:num_classes]
 print(in_features[:num_classes].shape)
@@ -64,5 +62,5 @@ model_coco["state_dict"]["roi_head.bbox_head.2.fc_cls.bias"] = in_features[:num_
 
 
 #save new model
-# torch.save(model_coco,"../data/pretrained/concatenate_coco_pretrained_"+os.path.basename(model_name).split('.')[0]+".pth")
-torch.save(model_coco,"../data/pretrain/champion2_2.pth")
+torch.save(model_coco,"../data/pretrained/concatenate_coco_pretrained_"+os.path.basename(model_name).split('.')[0]+".pth")
+
